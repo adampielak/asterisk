@@ -31,6 +31,8 @@ https.createServer({ key: pkey, cert: pcert }, function (req, res) {
 
         res.write(JSON.stringify(groups[q.group]));
         res.end();
+
+        return;
     }
 
     res.write(appName);
