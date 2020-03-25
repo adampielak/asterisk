@@ -68,7 +68,7 @@ Pi.Object.isEmpty = function (obj) {
  * @return {object}
  */
 Pi.Object.extend = function () {
-    for (let i = arguments.length - 1; i >= 0; i--) {
+    for (let i = 1; i < arguments.length; i++) {
         let obj = arguments[i];
         for (let v in obj) {
             arguments[0][v] = obj[v];
