@@ -17,7 +17,7 @@ var groups = [];
 https.createServer({ key: pkey, cert: pcert }, function (req, res) {
     const _url = url.parse(req.url, true);
 
-    if (_url.pathname == '/group/config') {
+    if (_url.pathname == '/group/config/get') {
         if (_url.query.group == null) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
