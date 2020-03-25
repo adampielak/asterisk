@@ -1,5 +1,8 @@
 /*! Copyright (C) 2015 - 2020 Manoel Neco. Todos Direitos Reservados */
 
+let = Pi = {};
+let global = {};
+
 /**
  * @class Pi.Object
  */
@@ -206,36 +209,6 @@ Pi.String.removeAcentos = function (str) {
     });
 
     return str2;
-};
-
-/**
- * Verifica se o objeto event fornecido contém apenas caracteres alphanuméricos
- * 
- * @method Pi.String.isAlphaNumeric
- * @param {event} e 
- * @return {boolean}
- */
-Pi.String.isAlphaNumeric = function (e) {
-    let charCode = (e.which) ? e.which : e.keyCode;
-    if (charCode == 8) return true;
-
-    let keynum;
-    let keychar;
-    let charcheck = /[a-zA-Z0-9]/;
-    if (window.event) // IE
-    {
-        keynum = e.keyCode;
-    }
-    else {
-        if (e.which) // Netscape/Firefox/Opera
-        {
-            keynum = e.which;
-        }
-        else return true;
-    }
-
-    keychar = String.fromCharCode(keynum);
-    return charcheck.test(keychar);
 };
 
 /**
@@ -655,10 +628,10 @@ Pi.Util.UUID = function (format) {
     return uuid + (Pi.seed++);
 }; Pi.Namespace = function (ns_string, builder) {
     var parts = ns_string.split('.'),
-        s = window,
+        s = Pi,
         i;
 
-    for (i = 0; i < parts.length; i++) {
+    for (i = 1; i < parts.length; i++) {
 
         if (typeof s[parts[i]] === "undefined") {
             s[parts[i]] = i + 1 == parts.length ? builder : {};
@@ -749,7 +722,7 @@ Pi.Constant = Pi.Namespace; Pi.Namespace('Pi.Class', class Class {
 
     builder() {
         let p = this.getClassName().split('.');
-        let obj = window;
+        let obj = global;
 
         for (let i = 0; i < p.length; i++) {
             obj = obj[p[i]]
@@ -1340,296 +1313,6 @@ Pi.Namespace('Pi.Promise', class pipromise extends Pi.Class {
 
         return this;
     }
-}); Pi.Namespace('Pi.Url', class piurl extends Pi.Class {
-
-    constructor(...args) {
-        super(...args);
-    }
-
-    init() {
-        let arr = arguments,
-            url = '';
-
-        for (let i = 0; i < arr.length; i++) {
-            let alias = arr[i];
-
-            if (Pi.Url.alias.exist(arr[i])) {
-                alias = Pi.Url.alias.getValue(arr[i]);
-            }
-
-            if (alias[0] == '/' && url[url.length - 1] == '/') {
-                url += alias.substring(1);
-            } else {
-                url += alias;
-            }
-
-        }
-
-        this.setUrl(url);
-    }
-
-    setUrl(url) {
-        if (Pi.Url.alias.exist(url)) {
-            url = Pi.Url.alias.getValue(url);
-        }
-
-        if (Pi.Url.isValid(url)) this.url = url;
-    }
-
-    scheme() {
-        let url = this.getUrl(),
-            i = url.indexOf(':');
-
-        if (i < 0) return '';
-        return url.substr(0, i);
-    }
-
-    host(host) {
-        let url = this.getUrl(),
-            h = this.parse(url, 'host');
-
-        if (host === undefined) {
-            return h;
-        } else {
-            this.setUrl(url.replace(h, host));
-            return this;
-        }
-    }
-
-    port(port) {
-        let url = this.getUrl(),
-            p = this.parse(url, 'port') || '';
-
-        if (Pi.Type.isUndefined(port)) {
-            return p;
-        }
-
-        let pt = this.port() || '',
-            href = this.href();
-
-        if (pt.length == 0) {
-            url = url.replace(href, href + ':' + port);
-        } else {
-            url = url.replace(p, port);
-        }
-
-        this.setUrl(url);
-
-        return this;
-    }
-
-    href(url) {
-        let u = this.host(),
-            h = u,
-            s = this.parse(this.getUrl(), 'scheme');
-
-        if (url === undefined) {
-            let p = this.port();
-
-            if (p.length == 0) p = '';
-            else p = ':' + p;
-
-            if (s.length > 0) {
-                h = s + '://' + u + p;
-            } else {
-                h = u + p;
-            }
-
-            return h;
-        }
-
-        this.setUrl(url);
-
-        return this;
-    }
-
-    hash(hash) {
-        let url = this.getUrl(),
-            hh = this.parse(url, 'hash');
-
-        if (hash === undefined) {
-            return hh;
-        } else {
-
-            if (hh.length == 0) {
-                this.setUrl(url + '#' + hash);
-            } else {
-                this.setUrl(url.replace(hh, hash));
-            }
-
-            return this;
-        }
-    }
-
-    appendPath(path) {
-        let url = this.getUrl(),
-            p = this.parse(url, 'path');
-
-        if (Pi.Url.alias.exist(path)) {
-            path = Pi.Url.alias.getValue(path);
-        }
-
-        if (path === undefined) {
-            return p;
-        } else {
-            if (url.substring(url.length - 1) != '/') url += '/';
-            this.setUrl(url + path);
-            return this;
-        }
-    }
-
-    path(path) {
-        let url = this.getUrl(),
-            p = this.parse(url, 'path'),
-            pp = '/' + p;
-
-        if (path === undefined) {
-            return pp;
-        }
-
-        if (Pi.Url.alias.exist(path)) {
-            path = Pi.Url.alias.getValue(path);
-        }
-
-        if (p.length == 0) {
-            if (url.substring(url.length - 1) != '/' && path.charAt(0) != '/') url += '/' + path;
-            else url += path;
-        } else {
-            url = url.replace(pp, path);
-        }
-
-        this.setUrl(url);
-
-        return this;
-    }
-
-    filename(filename) {
-        let url = this.getUrl();
-
-        if (filename === undefined) {
-            return url.replace(/\\/g, '/').replace(/.*\//, '').replace(/\?.*/, '') || '';
-        } else {
-            let u = this.getUrl(),
-                f = this.filename();
-
-            this.setUrl(u.replace(f, filename));
-            return this;
-        }
-    }
-
-    query(query) {
-        let url = this.getUrl(),
-            p = this.parse(url, 'query');
-
-        if (query === undefined) {
-            return p;
-        } else {
-            let q = this.query();
-            this.setUrl(url.replace(q, query));
-            return this;
-        }
-    }
-
-    addQuery(key, value) {
-        let q = this.query(),
-            url = this.getUrl(),
-            qs = Pi.String.format('{1}={2}', url, key, encodeURIComponent(value));
-
-        if (q.length == 0) {
-            this.setUrl(url + '?' + qs);
-        } else {
-            this.setUrl(url + '&' + qs);
-        }
-
-        return this;
-    }
-
-    getQuery(key) {
-        let qs = this.query().split('&');
-
-        for (var i = 0; i < qs.length; i++) {
-            let q = qs[i].split('=');
-            if (q[0] == key) {
-                return decodeURIComponent(q[1]);
-            }
-        }
-
-        return '';
-    }
-
-    dirname() {
-        return this.getUrl().replace(/\\/g, '/').replace(/\/[^\/]*$/, '');
-    }
-
-    getUrl() {
-        var url = this.url;
-        var m = this.options;
-
-        if (Pi.Subdomains.exist(m)) {
-            var s = Pi.Subdomains.next(m);
-            return Pi.String.format(this.url, s);
-        }
-
-        return this.url || '';
-    }
-
-    toString() {
-        return this.getUrl();
-    }
-
-    parse(url, parte) {
-        let p = { 'url': 0, 'scheme': 1, 'slash': 2, 'host': 3, 'port': 4, 'path': 5, 'query': 6, 'hash': 7 },
-            pattern = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/,
-            s = pattern.exec(url || '');
-
-        if (s == null) return '';
-        return s[p[parte]] || '';
-    }
-
-    static isValid(url) {
-        return /(http|https|)(:\/\/|)([\w-]+\.?)+[\w-]+(\/[\w- .\/?%&=]*)?/.test(url || '');
-    }
-
-    static add() {
-        Pi.Url.alias.add.apply(Pi.Url.alias, arguments);
-    }
-
-    static get(name) {
-        return Pi.Url.alias.getValue(name);
-    }
-
-    static to() {
-        let arr = arguments,
-            url = '';
-
-        for (let i = 0; i < arguments.length; i++) {
-            let alias = arr[i];
-
-            if (Pi.Url.alias.exist(arr[i])) {
-                alias = Pi.Url.alias.getValue(arr[i]);
-            }
-
-            if (alias[0] == '/' && url[url.length - 1] == '/') {
-                url += alias.substring(1);
-            } else {
-                url += alias;
-            }
-
-        }
-
-        window.location = url;
-    }
-
-    static query(query) {
-        let q = Pi.Url.create(window.location).query(),
-            p = q.split('&');
-
-        for (let i in p) {
-            let pp = p[i].split('=');
-            if (pp[0] == query) return pp[1];
-        }
-    }
-
 });
 
 Pi.Namespace('Pi.Subdomains', class pisubdomains extends Pi.Class {
@@ -1669,7 +1352,7 @@ Pi.Namespace('Pi.Subdomains', class pisubdomains extends Pi.Class {
 
 Pi.Subdomains = new Pi.Subdomains();
 
-Pi.Url.alias = new Pi.As(); Pi.Namespace('Pi.Callback', class picallback extends Pi.Class {
+Pi.Namespace('Pi.Callback', class picallback extends Pi.Class {
 
     constructor(...args) {
         super(...args);
