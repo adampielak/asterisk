@@ -18,19 +18,19 @@ https.createServer({ key: pkey, cert: pcert }, function (req, res) {
     const query = url.parse(req.url, true);
 
     if (query.pathname == '/group/config') {
-        if (q.group == null) {
+        if (query.group == null) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
             return;
         }
 
-        if (q.group.length == 0) {
+        if (query.group.length == 0) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
             return;
         }
 
-        res.write(JSON.stringify(groups[q.group]));
+        res.write(JSON.stringify(groups[query.group]));
         res.end();
 
         return;
