@@ -34,7 +34,7 @@ wss.on('connection', function (client) {
             rootId = message.rootId;
 
             onecast({
-                type: 'asterisk.config.setroot',
+                type: 'asterisk.config',
                 rootId: rootId
             }, client.group, client);
 
@@ -42,7 +42,7 @@ wss.on('connection', function (client) {
             masterId = message.masterId;
 
             onecast({
-                type: 'asterisk.config.setmaster',
+                type: 'asterisk.config',
                 masterId: masterId
             }, client.group, client);
 
