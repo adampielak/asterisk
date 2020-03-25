@@ -19,19 +19,19 @@ Https.createServer({ key: pkey, cert: pcert }, function (req, res) {
     const _url = Url.parse(req.url, true);
 
     if (_url.pathname == '/group/config/get') {
-        if (_url.query.group == null) {
+        if (_url.query.name == null) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
             return;
         }
 
-        if (_url.query.group.length == 0) {
+        if (_url.query.name.length == 0) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
             return;
         }
 
-        let group = groups[_url.query.group];
+        let group = groups[_url.query.name];
         if (group == null) {
             group = {};
         }
