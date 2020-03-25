@@ -44,15 +44,17 @@ Https.createServer({ key: pkey, cert: pcert }, function (req, res) {
         return;
     }
 
-    if (_url.pathname == '/clients/get') { 
+    if (_url.pathname == '/clients/get') {
         var clients = [];
 
-        wss.clients.forEach(client => { 
-            clients.push({
-                id: client.id,
-                name: client.name,
-                group: client.group
-            });
+        wss.clients.forEach(client => {
+            if (client.readyState == client.OPEN) {
+                clients.push({
+                    id: client.id,
+                    name: client.name,
+                    group: client.group
+                });
+            }
         });
 
         res.setHeader("Access-Control-Allow-Origin", "*");
