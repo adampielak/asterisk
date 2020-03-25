@@ -1,21 +1,22 @@
-const appName = 'Asterisk WebSocket 1.0.0 =';
+const AppName = 'Asterisk WebSocket 1.0.0 =';
 const WebSocketServer = require('ws').Server;
-const https = require('https');
-const fs = require('fs');
-const url = require('url');
+const Https = require('https');
+const File = require('fs');
+const Url = require('url');
+const Pi = require('./pillar.js');
 
-const pkey = fs.readFileSync('/etc/letsencrypt/live/test.galileu.space/privkey.pem');
-const pcert = fs.readFileSync('/etc/letsencrypt/live/test.galileu.space/fullchain.pem');
+const pkey = File.readFileSync('/etc/letsencrypt/live/test.galileu.space/privkey.pem');
+const pcert = File.readFileSync('/etc/letsencrypt/live/test.galileu.space/fullchain.pem');
 
 const wss = new WebSocketServer({
-    server: https.createServer({ key: pkey, cert: pcert }).listen(775)
+    server: Https.createServer({ key: pkey, cert: pcert }).listen(775)
 });
 
 var clientIncrement = 1;
 var groups = [];
 
-https.createServer({ key: pkey, cert: pcert }, function (req, res) {
-    const _url = url.parse(req.url, true);
+Https.createServer({ key: pkey, cert: pcert }, function (req, res) {
+    const _url = Url.parse(req.url, true);
 
     if (_url.pathname == '/group/config/get') {
         if (_url.query.group == null) {
@@ -34,14 +35,14 @@ https.createServer({ key: pkey, cert: pcert }, function (req, res) {
         if (group == null) {
             group = {};
         }
-        
+
         res.write(JSON.stringify(group));
         res.end();
 
         return;
     }
 
-    res.write(appName);
+    res.write(AppName);
     res.end();
 }).listen(8080);
 
@@ -61,7 +62,9 @@ wss.on('connection', function (client) {
         var message = JSON.parse(payload);
 
         if (message.type == 'asterisk.config') {
-            groups[message.group] = message;
+            if (message.group == null) return;
+            
+            groups[message.group] = Pi.Object.extend({}, message, groups[message.group]);
         } else if (message.type == 'asterisk.entergroup') {
             client.group = message.groupName;
 
@@ -139,4 +142,4 @@ function sendMessage(message, client) {
     client.send(JSON.stringify(message));
 }
 
-console.log(appName);
+console.log(AppName);
