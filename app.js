@@ -49,6 +49,13 @@ wss.on('connection', function (client) {
         }else if (message.type == 'asterisk.entergroup') {
             client.group = message.groupName;
 
+            unicast({
+                type: 'asterisk.config',
+                to: client.id,
+                rootId: rootId,
+                masterId: masterId,
+            });
+
             onecast({
                 type: 'asterisk.entergroup',
                 group: client.group,
@@ -109,9 +116,9 @@ function onecast(message, group, current) {
     });
 }
 
-function unicast(message, current) {
+function unicast(message, current = null) {
     wss.clients.forEach(client => {
-        if (client.id == current.id) return;
+        if (current != null && client.id == current.id) return;
         if (client.id == message.to) {
             sendMessage(message, client);
         }
