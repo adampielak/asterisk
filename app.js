@@ -30,10 +30,10 @@ https.createServer({ key: pkey, cert: pcert }, function (req, res) {
         }
 
         res.write(JSON.stringify(groups[q.group]));
-        res.end(appName);
+        res.end();
     }
 
-    res.write('');
+    res.write(appName);
     res.end();
 }).listen(8080);
 
