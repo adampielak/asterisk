@@ -15,22 +15,22 @@ var clientIncrement = 1;
 var groups = [];
 
 https.createServer({ key: pkey, cert: pcert }, function (req, res) {
-    const query = url.parse(req.url, true);
+    const url = url.parse(req.url, true);
 
-    if (query.pathname == '/group/config') {
-        if (query.group == null) {
+    if (url.pathname == '/group/config') {
+        if (url.query.group == null) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
             return;
         }
 
-        if (query.group.length == 0) {
+        if (url.query.group.length == 0) {
             res.write(JSON.stringify({ status: 'error', description: 'Parameter group not defined' }));
             res.end();
             return;
         }
 
-        res.write(JSON.stringify(groups[query.group]));
+        res.write(JSON.stringify(groups[url.query.group]));
         res.end();
 
         return;
