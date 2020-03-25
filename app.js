@@ -14,36 +14,61 @@ const wss = new WebSocketServer({
 // });
 
 var clientIncrement = 1;
+var rootId = 0;
+var masterId = 0;
 
 wss.on('connection', function (client) {
     client.id = clientIncrement++;
 
     client.send(JSON.stringify({
         type: 'asterisk.initialize',
-        id: client.id
+        clientId: client.id,
+        root: rootId,
+        masterId: masterId
     }));
 
     client.on('message', function (payload) {
         var message = JSON.parse(payload);
 
-        if (message.type == 'asterisk.entergroup') {
+        if (message.type == 'asterisk.config.setroot') {
+            rootId = message.rootId;
+
+            onecast({
+                type: 'asterisk.config.setroot',
+                rootId: rootId
+            }, client.group, client);
+
+        } else if (message.type == 'asterisk.config.setmaster') { 
+            masterId = message.masterId;
+
+            onecast({
+                type: 'asterisk.config.setmaster',
+                masterId: masterId
+            }, client.group, client);
+
+        }else if (message.type == 'asterisk.entergroup') {
             client.group = message.groupName;
+
             onecast({
                 type: 'asterisk.entergroup',
                 group: client.group,
                 from: client.id
-            }, client);
+            }, client.group, client);
+
         } else if (message.type == 'asterisk.leavegroup') {
+            const group = client.group;
             client.group = null;
+
             onecast({
                 type: 'asterisk.leavegroup',
-                group: client.group,
+                group: group,
                 from: client.id
-            }, client);
+            }, group, client);
+            
         } else if (message.type == 'asterisk.broadcast') {
             broadcast(message, client);
         } else if (message.type == 'asterisk.onecast') {
-            onecast(message, client);
+            onecast(message, message.group, client);
         } else if (message.type == 'asterisk.unicast') {
             unicast(message, client);
         }
@@ -55,7 +80,7 @@ wss.on('connection', function (client) {
                 type: 'asterisk.client.disconnected',
                 group: client.group,
                 from: client.id,
-            }, client);
+            }, client.group, client);
         } else {
             broadcast({
                 type: 'asterisk.client.disconnected',
@@ -73,10 +98,12 @@ function broadcast(message, current) {
     })
 }
 
-function onecast(message, current) {
+function onecast(message, group, current) {
+    if (group == null) return;
+
     wss.clients.forEach(client => {
         if (client.id == current.id) return;
-        if (client.group == message.group) {
+        if (client.group == group) {
             sendMessage(message, client);
         }
     });
