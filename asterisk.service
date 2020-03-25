@@ -1,5 +1,5 @@
 [Unit]
-Description = One Service 1.0
+Description = Asterisk 1.0
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
