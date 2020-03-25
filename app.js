@@ -13,7 +13,7 @@ const wss = new WebSocketServer({
 var clientIncrement = 1;
 var groups = [];
 
-https.createServer({ key: pkey, cert: pcert }).createServer(function (req, res) {
+https.createServer({ key: pkey, cert: pcert }, function (req, res) {
     const query = url.parse(req.url, true);
 
     if (query.pathname == '/group/config') {
