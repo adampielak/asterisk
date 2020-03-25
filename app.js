@@ -2,6 +2,7 @@ const appName = 'Asterisk WebSocket 1.0.0 =';
 const WebSocketServer = require('ws').Server;
 const https = require('https');
 const fs = require('fs');
+const url = require('url');
 
 const pkey = fs.readFileSync('/etc/letsencrypt/live/test.galileu.space/privkey.pem');
 const pcert = fs.readFileSync('/etc/letsencrypt/live/test.galileu.space/fullchain.pem');
