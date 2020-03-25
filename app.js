@@ -61,7 +61,7 @@ wss.on('connection', function (client) {
         var message = JSON.parse(payload);
 
         if (message.type == 'asterisk.config') {
-            groups[client.group] = message;
+            groups[message.group] = message;
         } else if (message.type == 'asterisk.entergroup') {
             client.group = message.groupName;
 
