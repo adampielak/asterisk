@@ -81,7 +81,7 @@ wss.on('connection', function (client) {
         if (message.type == 'asterisk.config') {
             if (message.group == null) return;
 
-            groups[message.group] = Pi.Object.extend({}, message, groups[message.group]);
+            groups[message.group] = Pi.Object.extend({}, groups[message.group], message);
         } else if (message.type == 'asterisk.entergroup') {
             client.group = message.groupName;
 
