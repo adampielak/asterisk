@@ -44,6 +44,23 @@ Https.createServer({ key: pkey, cert: pcert }, function (req, res) {
         return;
     }
 
+    if (_url.pathname == '/group/clients/get') { 
+        var clients = [];
+
+        wss.clients.forEach(client => { 
+            clients.push({
+                id: client.id,
+                name: client.name,
+                group: client.group
+            });
+        });
+
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.write(clients);
+        res.end();
+    }
+
     res.write(AppName);
     res.end();
 }).listen(8080);
