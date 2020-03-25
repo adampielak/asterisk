@@ -36,6 +36,8 @@ Https.createServer({ key: pkey, cert: pcert }, function (req, res) {
             group = {};
         }
 
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.write(JSON.stringify(group));
         res.end();
 
